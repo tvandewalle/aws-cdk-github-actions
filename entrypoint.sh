@@ -111,7 +111,7 @@ function main(){
 	parseInputs
   installAwsCdk
 	cd ${GITHUB_WORKSPACE}/${INPUT_WORKING_DIR}
-  installNpmRequirements
+  installNpmPackages
 	installPipRequirements
 	runCdk ${INPUT_CDK_ARGS}
 }
