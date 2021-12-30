@@ -10,17 +10,13 @@ function parseInputs(){
 	fi
 }
 
-function installTypescript(){
-	npm install typescript
-}
-
 function installAwsCdk(){
 	echo "Install aws-cdk ${INPUT_CDK_VERSION}"
 	if [ "${INPUT_CDK_VERSION}" == "latest" ]; then
 		if [ "${INPUT_DEBUG_LOG}" == "true" ]; then
-			npm install -g aws-cdk
+			npm install -g aws-cdk --no-save
 		else
-			npm install -g aws-cdk >/dev/null 2>&1
+			npm install -g aws-cdk --no-save >/dev/null 2>&1
 		fi
 
 		if [ "${?}" -ne 0 ]; then
@@ -30,9 +26,9 @@ function installAwsCdk(){
 		fi
 	else
 		if [ "${INPUT_DEBUG_LOG}" == "true" ]; then
-			npm install -g aws-cdk@${INPUT_CDK_VERSION}
+			npm install -g aws-cdk@${INPUT_CDK_VERSION} --no-save
 		else
-			npm install -g aws-cdk@${INPUT_CDK_VERSION} >/dev/null 2>&1
+			npm install -g aws-cdk@${INPUT_CDK_VERSION} --no-save >/dev/null 2>&1
 		fi
 
 		if [ "${?}" -ne 0 ]; then
@@ -42,7 +38,22 @@ function installAwsCdk(){
 		fi
 	fi
 }
+function installNpmPackages(){
+	if [ -e "package-lock.json" ]; then
+		echo "npm ci"
+		if [ "${INPUT_DEBUG_LOG}" == "true" ]; then
+			npm ci
+		else
+			npm ci >/dev/null 2>&1
+		fi
 
+		if [ "${?}" -ne 0 ]; then
+			echo "Failed to install package-lock.json dependencies"
+		else
+			echo "Successful install package-lock.json dependencies"
+		fi
+	fi
+}
 function installPipRequirements(){
 	if [ -e "requirements.txt" ]; then
 		echo "Install requirements.txt"
@@ -98,9 +109,9 @@ ${output}
 
 function main(){
 	parseInputs
+  installAwsCdk
 	cd ${GITHUB_WORKSPACE}/${INPUT_WORKING_DIR}
-	installTypescript
-	installAwsCdk
+  installNpmRequirements
 	installPipRequirements
 	runCdk ${INPUT_CDK_ARGS}
 }
